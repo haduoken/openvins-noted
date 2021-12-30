@@ -63,8 +63,7 @@ namespace ov_msckf {
  * If we have measurements to propagate or update with, this class will call on our state to do that.
  */
 class VioManager {
-
-public:
+ public:
   /**
    * @brief Default constructor, will load all configuration variables
    * @param params_ Parameters loaded from either ROS or CMDLINE
@@ -92,15 +91,13 @@ public:
    * @param camids Camera ids that we have simulated measurements for
    * @param feats Raw uv simulated measurements
    */
-  void feed_measurement_simulation(double timestamp, const std::vector<int> &camids,
-                                   const std::vector<std::vector<std::pair<size_t, Eigen::VectorXf>>> &feats);
+  void feed_measurement_simulation(double timestamp, const std::vector<int> &camids, const std::vector<std::vector<std::pair<size_t, Eigen::VectorXf>>> &feats);
 
   /**
    * @brief Given a state, this will initialize our IMU state.
    * @param imustate State in the MSCKF ordering: [time(sec),q_GtoI,p_IinG,v_IinG,b_gyro,b_accel]
    */
   void initialize_with_gt(Eigen::Matrix<double, 17, 1> imustate) {
-
     // Initialize the system
     state->_imu->set_value(imustate.block(1, 0, 16, 1));
     state->_imu->set_fej(imustate.block(1, 0, 16, 1));
@@ -129,13 +126,11 @@ public:
 
     // Print what we init'ed with
     PRINT_DEBUG(GREEN "[INIT]: INITIALIZED FROM GROUNDTRUTH FILE!!!!!\n" RESET);
-    PRINT_DEBUG(GREEN "[INIT]: orientation = %.4f, %.4f, %.4f, %.4f\n" RESET, state->_imu->quat()(0), state->_imu->quat()(1),
-                state->_imu->quat()(2), state->_imu->quat()(3));
-    PRINT_DEBUG(GREEN "[INIT]: bias gyro = %.4f, %.4f, %.4f\n" RESET, state->_imu->bias_g()(0), state->_imu->bias_g()(1),
-                state->_imu->bias_g()(2));
+    PRINT_DEBUG(GREEN "[INIT]: orientation = %.4f, %.4f, %.4f, %.4f\n" RESET, state->_imu->quat()(0), state->_imu->quat()(1), state->_imu->quat()(2),
+                state->_imu->quat()(3));
+    PRINT_DEBUG(GREEN "[INIT]: bias gyro = %.4f, %.4f, %.4f\n" RESET, state->_imu->bias_g()(0), state->_imu->bias_g()(1), state->_imu->bias_g()(2));
     PRINT_DEBUG(GREEN "[INIT]: velocity = %.4f, %.4f, %.4f\n" RESET, state->_imu->vel()(0), state->_imu->vel()(1), state->_imu->vel()(2));
-    PRINT_DEBUG(GREEN "[INIT]: bias accel = %.4f, %.4f, %.4f\n" RESET, state->_imu->bias_a()(0), state->_imu->bias_a()(1),
-                state->_imu->bias_a()(2));
+    PRINT_DEBUG(GREEN "[INIT]: bias accel = %.4f, %.4f, %.4f\n" RESET, state->_imu->bias_a()(0), state->_imu->bias_a()(1), state->_imu->bias_a()(2));
     PRINT_DEBUG(GREEN "[INIT]: position = %.4f, %.4f, %.4f\n" RESET, state->_imu->pos()(0), state->_imu->pos()(1), state->_imu->pos()(2));
   }
 
@@ -156,13 +151,11 @@ public:
 
   /// Get a nice visualization image of what tracks we have
   cv::Mat get_historical_viz_image() {
-
     // Get our image of history tracks
     cv::Mat img_history;
     if (did_zupt_update) {
       img_history = zupt_image;
     } else {
-
       // Build an id-list of what features we should highlight (i.e. SLAM)
       std::vector<size_t> highlighted_ids;
       for (const auto &feat : state->_features_SLAM) {
@@ -188,8 +181,7 @@ public:
   std::vector<Eigen::Vector3d> get_features_SLAM() {
     std::vector<Eigen::Vector3d> slam_feats;
     for (auto &f : state->_features_SLAM) {
-      if ((int)f.first <= 4 * state->_options.max_aruco_features)
-        continue;
+      if ((int)f.first <= 4 * state->_options.max_aruco_features) continue;
       if (ov_type::LandmarkRepresentation::is_relative_representation(f.second->_feat_representation)) {
         // Assert that we have an anchor pose for this feature
         assert(f.second->_anchor_cam_id != -1);
@@ -212,8 +204,7 @@ public:
   std::vector<Eigen::Vector3d> get_features_ARUCO() {
     std::vector<Eigen::Vector3d> aruco_feats;
     for (auto &f : state->_features_SLAM) {
-      if ((int)f.first > 4 * state->_options.max_aruco_features)
-        continue;
+      if ((int)f.first > 4 * state->_options.max_aruco_features) continue;
       if (ov_type::LandmarkRepresentation::is_relative_representation(f.second->_feat_representation)) {
         // Assert that we have an anchor pose for this feature
         assert(f.second->_anchor_cam_id != -1);
@@ -246,7 +237,7 @@ public:
     feat_tracks_uvd = active_tracks_uvd;
   }
 
-protected:
+ protected:
   /**
    * @brief Given a new set of camera images, this will track them.
    *
@@ -354,6 +345,6 @@ protected:
   cv::Mat active_image;
 };
 
-} // namespace ov_msckf
+}  // namespace ov_msckf
 
-#endif // OV_MSCKF_VIOMANAGER_H
+#endif  // OV_MSCKF_VIOMANAGER_H
