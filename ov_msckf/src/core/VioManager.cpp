@@ -144,6 +144,9 @@ void VioManager::feed_measurement_imu(const ov_core::ImuData &message) {
   }
 
   // Count how many unique image streams
+  PRINT_INFO("imu msg ######\n");
+
+  // 看camera_queue里面是否有东西
   std::vector<int> unique_cam_ids;
   for (const auto &cam_msg : camera_queue) {
     if (std::find(unique_cam_ids.begin(), unique_cam_ids.end(), cam_msg.sensor_ids.at(0)) != unique_cam_ids.end()) continue;
@@ -152,6 +155,7 @@ void VioManager::feed_measurement_imu(const ov_core::ImuData &message) {
 
   // If we do not have enough unique cameras then we need to wait
   // We should wait till we have one of each camera to ensure we propagate in the correct order
+  // 如果camera_queue里面是空的 --> return
   size_t num_unique_cameras = (params.state_options.num_cameras == 2) ? 1 : params.state_options.num_cameras;
   if (unique_cam_ids.size() != num_unique_cameras) return;
 
