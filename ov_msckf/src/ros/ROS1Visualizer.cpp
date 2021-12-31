@@ -27,7 +27,6 @@ using namespace ov_msckf;
 
 ROS1Visualizer::ROS1Visualizer(std::shared_ptr<ros::NodeHandle> nh, std::shared_ptr<VioManager> app, std::shared_ptr<Simulator> sim)
     : _nh(nh), _app(app), _sim(sim) {
-
   // Setup our transform broadcaster
   mTfBr = std::make_shared<tf::TransformBroadcaster>();
 
@@ -89,7 +88,6 @@ ROS1Visualizer::ROS1Visualizer(std::shared_ptr<ros::NodeHandle> nh, std::shared_
 
   // If the file is not open, then open the file
   if (save_total_state) {
-
     // files we will open
     std::string filepath_est, filepath_std, filepath_gt;
     nh->param<std::string>("filepath_est", filepath_est, "state_estimate.txt");
@@ -97,10 +95,8 @@ ROS1Visualizer::ROS1Visualizer(std::shared_ptr<ros::NodeHandle> nh, std::shared_
     nh->param<std::string>("filepath_gt", filepath_gt, "state_groundtruth.txt");
 
     // If it exists, then delete it
-    if (boost::filesystem::exists(filepath_est))
-      boost::filesystem::remove(filepath_est);
-    if (boost::filesystem::exists(filepath_std))
-      boost::filesystem::remove(filepath_std);
+    if (boost::filesystem::exists(filepath_est)) boost::filesystem::remove(filepath_est);
+    if (boost::filesystem::exists(filepath_std)) boost::filesystem::remove(filepath_std);
 
     // Create folder path to this location if not exists
     boost::filesystem::create_directories(boost::filesystem::path(filepath_est.c_str()).parent_path());
@@ -115,8 +111,7 @@ ROS1Visualizer::ROS1Visualizer(std::shared_ptr<ros::NodeHandle> nh, std::shared_
 
     // Groundtruth if we are simulating
     if (_sim != nullptr) {
-      if (boost::filesystem::exists(filepath_gt))
-        boost::filesystem::remove(filepath_gt);
+      if (boost::filesystem::exists(filepath_gt)) boost::filesystem::remove(filepath_gt);
       of_state_gt.open(filepath_gt.c_str());
       of_state_gt << "# timestamp(s) q p v bg ba cam_imu_dt num_cam cam0_k cam0_d cam0_rot cam0_trans .... etc" << std::endl;
     }
@@ -124,7 +119,6 @@ ROS1Visualizer::ROS1Visualizer(std::shared_ptr<ros::NodeHandle> nh, std::shared_
 }
 
 void ROS1Visualizer::setup_subscribers(std::shared_ptr<ov_core::YamlParser> parser) {
-
   // We need a valid parser
   assert(parser != nullptr);
 
@@ -169,10 +163,8 @@ void ROS1Visualizer::setup_subscribers(std::shared_ptr<ov_core::YamlParser> pars
 }
 
 void ROS1Visualizer::visualize() {
-
   // Return if we have already visualized
-  if (last_visualization_timestamp == _app->get_state()->_timestamp && _app->initialized())
-    return;
+  if (last_visualization_timestamp == _app->get_state()->_timestamp && _app->initialized()) return;
   last_visualization_timestamp = _app->get_state()->_timestamp;
 
   // Start timing
@@ -183,8 +175,7 @@ void ROS1Visualizer::visualize() {
   publish_images();
 
   // Return if we have not inited
-  if (!_app->initialized())
-    return;
+  if (!_app->initialized()) return;
 
   // Save the start time of this dataset
   if (!start_time_set) {
@@ -216,14 +207,11 @@ void ROS1Visualizer::visualize() {
 }
 
 void ROS1Visualizer::visualize_odometry(double timestamp) {
-
   // Check if we have subscribers
-  if (pub_odomimu.getNumSubscribers() == 0)
-    return;
+  if (pub_odomimu.getNumSubscribers() == 0) return;
 
   // Return if we have not inited and a second has passes
-  if (!_app->initialized() || (timestamp - _app->initialized_time()) < 1)
-    return;
+  if (!_app->initialized() || (timestamp - _app->initialized_time()) < 1) return;
 
   // Get fast propagate state at the desired timestamp
   std::shared_ptr<State> state = _app->get_state();
@@ -262,9 +250,9 @@ void ROS1Visualizer::visualize_odometry(double timestamp) {
   odomIinM.twist.twist.linear.x = state_plus(7);
   odomIinM.twist.twist.linear.y = state_plus(8);
   odomIinM.twist.twist.linear.z = state_plus(9);
-  odomIinM.twist.twist.angular.x = state_plus(10); // we do not estimate this...
-  odomIinM.twist.twist.angular.y = state_plus(11); // we do not estimate this...
-  odomIinM.twist.twist.angular.z = state_plus(12); // we do not estimate this...
+  odomIinM.twist.twist.angular.x = state_plus(10);  // we do not estimate this...
+  odomIinM.twist.twist.angular.y = state_plus(11);  // we do not estimate this...
+  odomIinM.twist.twist.angular.z = state_plus(12);  // we do not estimate this...
 
   // Velocity covariance (linear then angular)
   // TODO: this currently is an approximation since this should actually evolve over our propagation period
@@ -285,7 +273,6 @@ void ROS1Visualizer::visualize_odometry(double timestamp) {
 }
 
 void ROS1Visualizer::visualize_final() {
-
   // Final time offset value
   if (_app->get_state()->_options.do_calib_camera_timeoffset) {
     PRINT_INFO(REDPURPLE "camera-imu timeoffset = %.5f\n\n" RESET, _app->get_state()->_calib_dt_CAMtoIMU->value()(0));
@@ -336,7 +323,6 @@ void ROS1Visualizer::visualize_final() {
 }
 
 void ROS1Visualizer::callback_inertial(const sensor_msgs::Imu::ConstPtr &msg) {
-
   // convert into correct format
   ov_core::ImuData message;
   message.timestamp = msg->header.stamp.toSec();
@@ -350,7 +336,6 @@ void ROS1Visualizer::callback_inertial(const sensor_msgs::Imu::ConstPtr &msg) {
 }
 
 void ROS1Visualizer::callback_monocular(const sensor_msgs::ImageConstPtr &msg0, int cam_id0) {
-
   // Get the image
   cv_bridge::CvImageConstPtr cv_ptr;
   try {
@@ -378,9 +363,7 @@ void ROS1Visualizer::callback_monocular(const sensor_msgs::ImageConstPtr &msg0, 
   _app->feed_measurement_camera(message);
 }
 
-void ROS1Visualizer::callback_stereo(const sensor_msgs::ImageConstPtr &msg0, const sensor_msgs::ImageConstPtr &msg1, int cam_id0,
-                                     int cam_id1) {
-
+void ROS1Visualizer::callback_stereo(const sensor_msgs::ImageConstPtr &msg0, const sensor_msgs::ImageConstPtr &msg1, int cam_id0, int cam_id1) {
   // Get the image
   cv_bridge::CvImageConstPtr cv_ptr0;
   try {
@@ -423,7 +406,6 @@ void ROS1Visualizer::callback_stereo(const sensor_msgs::ImageConstPtr &msg0, con
 }
 
 void ROS1Visualizer::publish_state() {
-
   // Get the current state
   std::shared_ptr<State> state = _app->get_state();
 
@@ -503,10 +485,8 @@ void ROS1Visualizer::publish_state() {
 }
 
 void ROS1Visualizer::publish_images() {
-
   // Check if we have subscribers
-  if (it_pub_tracks.getNumSubscribers() == 0)
-    return;
+  if (it_pub_tracks.getNumSubscribers() == 0) return;
 
   // Get our image of history tracks
   cv::Mat img_history = _app->get_historical_viz_image();
@@ -521,7 +501,6 @@ void ROS1Visualizer::publish_images() {
 }
 
 void ROS1Visualizer::publish_features() {
-
   // Check if we have subscribers
   if (pub_points_msckf.getNumSubscribers() == 0 && pub_points_slam.getNumSubscribers() == 0 && pub_points_aruco.getNumSubscribers() == 0 &&
       pub_points_sim.getNumSubscribers() == 0)
@@ -543,8 +522,7 @@ void ROS1Visualizer::publish_features() {
   pub_points_aruco.publish(cloud_ARUCO);
 
   // Skip the rest of we are not doing simulation
-  if (_sim == nullptr)
-    return;
+  if (_sim == nullptr) return;
 
   // Get our good SIMULATION features
   std::vector<Eigen::Vector3d> feats_sim = _sim->get_map_vec();
@@ -553,7 +531,6 @@ void ROS1Visualizer::publish_features() {
 }
 
 void ROS1Visualizer::publish_groundtruth() {
-
   // Our groundtruth state
   Eigen::Matrix<double, 17, 1> state_gt;
 
@@ -571,8 +548,7 @@ void ROS1Visualizer::publish_groundtruth() {
   // NOTE: we get the true time in the IMU clock frame
   if (_sim != nullptr) {
     timestamp_inI = _app->get_state()->_timestamp + _sim->get_true_parameters().calib_camimu_dt;
-    if (!_sim->get_state(timestamp_inI, state_gt))
-      return;
+    if (!_sim->get_state(timestamp_inI, state_gt)) return;
   }
 
   // Get the GT and system state state
@@ -666,17 +642,16 @@ void ROS1Visualizer::publish_groundtruth() {
   }
 
   // Nice display for the user
-  PRINT_INFO(REDPURPLE "error to gt => %.3f, %.3f (deg,m) | average error => %.3f, %.3f (deg,m) | called %d times\n" RESET, rmse_ori,
-             rmse_pos, summed_rmse_ori / summed_number, summed_rmse_pos / summed_number, (int)summed_number);
-  PRINT_INFO(REDPURPLE "nees => %.1f, %.1f (ori,pos) | average nees = %.1f, %.1f (ori,pos)\n" RESET, ori_nees, pos_nees,
-             summed_nees_ori / summed_number, summed_nees_pos / summed_number);
+  PRINT_INFO(REDPURPLE "error to gt => %.3f, %.3f (deg,m) | average error => %.3f, %.3f (deg,m) | called %d times\n" RESET, rmse_ori, rmse_pos,
+             summed_rmse_ori / summed_number, summed_rmse_pos / summed_number, (int)summed_number);
+  PRINT_INFO(REDPURPLE "nees => %.1f, %.1f (ori,pos) | average nees = %.1f, %.1f (ori,pos)\n" RESET, ori_nees, pos_nees, summed_nees_ori / summed_number,
+             summed_nees_pos / summed_number);
 
   //==========================================================================
   //==========================================================================
 }
 
 void ROS1Visualizer::publish_loopclosure_information() {
-
   // Get the current tracks in this frame
   double active_tracks_time1 = -1;
   double active_tracks_time2 = -1;
@@ -685,12 +660,9 @@ void ROS1Visualizer::publish_loopclosure_information() {
   cv::Mat active_cam0_image;
   _app->get_active_tracks(active_tracks_time1, active_tracks_posinG, active_tracks_uvd);
   _app->get_active_image(active_tracks_time2, active_cam0_image);
-  if (active_tracks_time1 == -1)
-    return;
-  if (_app->get_state()->_clones_IMU.find(active_tracks_time1) == _app->get_state()->_clones_IMU.end())
-    return;
-  if (active_tracks_time1 != active_tracks_time2)
-    return;
+  if (active_tracks_time1 == -1) return;
+  if (_app->get_state()->_clones_IMU.find(active_tracks_time1) == _app->get_state()->_clones_IMU.end()) return;
+  if (active_tracks_time1 != active_tracks_time2) return;
 
   // Default header
   std_msgs::Header header;
@@ -698,9 +670,7 @@ void ROS1Visualizer::publish_loopclosure_information() {
 
   //======================================================
   // Check if we have subscribers for the pose odometry, camera intrinsics, or extrinsics
-  if (pub_loop_pose.getNumSubscribers() != 0 || pub_loop_extrinsic.getNumSubscribers() != 0 ||
-      pub_loop_intrinsics.getNumSubscribers() != 0) {
-
+  if (pub_loop_pose.getNumSubscribers() != 0 || pub_loop_extrinsic.getNumSubscribers() != 0 || pub_loop_intrinsics.getNumSubscribers() != 0) {
     // PUBLISH HISTORICAL POSE ESTIMATE
     nav_msgs::Odometry odometry_pose;
     odometry_pose.header = header;
@@ -745,13 +715,11 @@ void ROS1Visualizer::publish_loopclosure_information() {
   //======================================================
   // PUBLISH FEATURE TRACKS IN THE GLOBAL FRAME OF REFERENCE
   if (pub_loop_point.getNumSubscribers() != 0) {
-
     // Construct the message
     sensor_msgs::PointCloud point_cloud;
     point_cloud.header = header;
     point_cloud.header.frame_id = "global";
     for (const auto &feattimes : active_tracks_posinG) {
-
       // Get this feature information
       size_t featid = feattimes.first;
       Eigen::Vector3d uvd = Eigen::Vector3d::Zero();
@@ -784,7 +752,6 @@ void ROS1Visualizer::publish_loopclosure_information() {
   //======================================================
   // Depth images of sparse points and its colorized version
   if (it_pub_loop_img_depth.getNumSubscribers() != 0 || it_pub_loop_img_depth_color.getNumSubscribers() != 0) {
-
     // Create the images we will populate with the depths
     std::pair<int, int> wh_pair = {active_cam0_image.cols, active_cam0_image.rows};
     cv::Mat depthmap_viz;
@@ -793,7 +760,6 @@ void ROS1Visualizer::publish_loopclosure_information() {
 
     // Loop through all points and append
     for (const auto &feattimes : active_tracks_uvd) {
-
       // Get this feature information
       size_t featid = feattimes.first;
       Eigen::Vector3d uvd = active_tracks_uvd.at(featid);
@@ -813,14 +779,11 @@ void ROS1Visualizer::publish_loopclosure_information() {
       // https://github.com/tum-vision/lsd_slam/blob/d1e6f0e1a027889985d2e6b4c0fe7a90b0c75067/lsd_slam_core/src/util/globalFuncs.cpp#L87-L96
       float id = 1.0f / (float)uvd(2);
       float r = (0.0f - id) * 255 / 1.0f;
-      if (r < 0)
-        r = -r;
+      if (r < 0) r = -r;
       float g = (1.0f - id) * 255 / 1.0f;
-      if (g < 0)
-        g = -g;
+      if (g < 0) g = -g;
       float b = (2.0f - id) * 255 / 1.0f;
-      if (b < 0)
-        b = -b;
+      if (b < 0) b = -b;
       uchar rc = r < 0 ? 0 : (r > 255 ? 255 : r);
       uchar gc = g < 0 ? 0 : (g > 255 ? 255 : g);
       uchar bc = b < 0 ? 0 : (b > 255 ? 255 : b);

@@ -51,8 +51,7 @@ namespace ov_init {
  * and finally a full optimization to allow for covariance recovery.
  */
 class InertialInitializer {
-
-public:
+ public:
   /**
    * @brief Default constructor
    * @param params_ Parameters loaded from either ROS or CMDLINE
@@ -65,7 +64,6 @@ public:
    * @param message Contains our timestamp and inertial information
    */
   void feed_imu(const ov_core::ImuData &message) {
-
     // Append it to our vector
     imu_data->push_back(message);
 
@@ -86,10 +84,10 @@ public:
    * @param wait_for_jerk If true we will wait for a "jerk"
    * @return True if we have successfully initialized our system
    */
-  bool initialize(double &timestamp, Eigen::MatrixXd &covariance, std::vector<std::shared_ptr<ov_type::Type>> &order,
-                  std::shared_ptr<ov_type::IMU> t_imu, bool wait_for_jerk = true);
+  bool initialize(double &timestamp, Eigen::MatrixXd &covariance, std::vector<std::shared_ptr<ov_type::Type>> &order, std::shared_ptr<ov_type::IMU> t_imu,
+                  bool wait_for_jerk = true);
 
-protected:
+ protected:
   /// Initialization parameters
   InertialInitializerOptions params;
 
@@ -103,6 +101,6 @@ protected:
   std::shared_ptr<StaticInitializer> init_static;
 };
 
-} // namespace ov_init
+}  // namespace ov_init
 
-#endif // OV_INIT_INERTIALINITIALIZER_H
+#endif  // OV_INIT_INERTIALINITIALIZER_H

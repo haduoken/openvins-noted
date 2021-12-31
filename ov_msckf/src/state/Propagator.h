@@ -37,13 +37,11 @@ namespace ov_msckf {
  * For derivations look at @ref propagation page which has detailed equations.
  */
 class Propagator {
-
-public:
+ public:
   /**
    * @brief Struct of our imu noise parameters
    */
   struct NoiseManager {
-
     /// Gyroscope white noise (rad/s/sqrt(hz))
     double sigma_w = 1.6968e-04;
 
@@ -96,7 +94,6 @@ public:
    * @param message Contains our timestamp and inertial information
    */
   void feed_imu(const ov_core::ImuData &message) {
-
     // Append it to our vector
     imu_data.emplace_back(message);
 
@@ -153,8 +150,7 @@ public:
    * @param warn If we should warn if we don't have enough IMU to propagate with (e.g. fast prop will get warnings otherwise)
    * @return Vector of measurements (if we could compute them)
    */
-  static std::vector<ov_core::ImuData> select_imu_readings(const std::vector<ov_core::ImuData> &imu_data, double time0, double time1,
-                                                           bool warn = true);
+  static std::vector<ov_core::ImuData> select_imu_readings(const std::vector<ov_core::ImuData> &imu_data, double time0, double time1, bool warn = true);
 
   /**
    * @brief Nice helper function that will linearly interpolate between two imu messages.
@@ -178,7 +174,7 @@ public:
     return data;
   }
 
-protected:
+ protected:
   /// Estimate for time offset at last propagation time
   double last_prop_time_offset = 0.0;
   bool have_last_prop_time_offset = false;
@@ -257,9 +253,8 @@ protected:
    * @param new_v The resulting new velocity after integration
    * @param new_p The resulting new position after integration
    */
-  void predict_mean_rk4(std::shared_ptr<State> state, double dt, const Eigen::Vector3d &w_hat1, const Eigen::Vector3d &a_hat1,
-                        const Eigen::Vector3d &w_hat2, const Eigen::Vector3d &a_hat2, Eigen::Vector4d &new_q, Eigen::Vector3d &new_v,
-                        Eigen::Vector3d &new_p);
+  void predict_mean_rk4(std::shared_ptr<State> state, double dt, const Eigen::Vector3d &w_hat1, const Eigen::Vector3d &a_hat1, const Eigen::Vector3d &w_hat2,
+                        const Eigen::Vector3d &a_hat2, Eigen::Vector4d &new_q, Eigen::Vector3d &new_v, Eigen::Vector3d &new_p);
 
   /// Container for the noise values
   NoiseManager _noises;
@@ -271,6 +266,6 @@ protected:
   Eigen::Vector3d _gravity;
 };
 
-} // namespace ov_msckf
+}  // namespace ov_msckf
 
-#endif // OV_MSCKF_STATE_PROPAGATOR_H
+#endif  // OV_MSCKF_STATE_PROPAGATOR_H
