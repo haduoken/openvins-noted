@@ -25,9 +25,8 @@ using namespace ov_core;
 using namespace ov_type;
 using namespace ov_init;
 
-bool StaticInitializer::initialize(double &timestamp, Eigen::MatrixXd &covariance, std::vector<std::shared_ptr<Type>> &order,
-                                   std::shared_ptr<IMU> t_imu, bool wait_for_jerk) {
-
+bool StaticInitializer::initialize(double &timestamp, Eigen::MatrixXd &covariance, std::vector<std::shared_ptr<Type>> &order, std::shared_ptr<IMU> t_imu,
+                                   bool wait_for_jerk) {
   // Return if we don't have any measurements
   if (imu_data->size() < 2) {
     return false;
@@ -62,7 +61,6 @@ bool StaticInitializer::initialize(double &timestamp, Eigen::MatrixXd &covarianc
 
   // First we can check the disparity of the two
   if (params.init_max_disparity > 0) {
-
     // Get time in the camera
     double time0_imu_in_cam = window_2to1.at(0).timestamp;
     double time1_imu_in_cam = window_2to1.at(window_2to1.size() - 1).timestamp;
@@ -102,8 +100,7 @@ bool StaticInitializer::initialize(double &timestamp, Eigen::MatrixXd &covarianc
 
     // Check if it passed our check!
     if (average_disparity > params.init_max_disparity) {
-      PRINT_DEBUG(YELLOW "[INIT-IMU]: disparity says the platform is moving %.4f < %.4f\n" RESET, average_disparity,
-                  params.init_max_disparity);
+      PRINT_DEBUG(YELLOW "[INIT-IMU]: disparity says the platform is moving %.4f < %.4f\n" RESET, average_disparity, params.init_max_disparity);
       return false;
     }
   }
@@ -152,8 +149,7 @@ bool StaticInitializer::initialize(double &timestamp, Eigen::MatrixXd &covarianc
   // If it is above the threshold and we are not waiting for a jerk
   // Then we are not stationary (i.e. moving) so we should wait till we are
   if ((a_var_1to0 > params.init_imu_thresh || a_var_2to1 > params.init_imu_thresh) && !wait_for_jerk) {
-    PRINT_DEBUG(YELLOW "[INIT-IMU]: to much IMU excitation, above threshold %.4f,%.4f > %.4f\n" RESET, a_var_1to0, a_var_2to1,
-                params.init_imu_thresh);
+    PRINT_DEBUG(YELLOW "[INIT-IMU]: to much IMU excitation, above threshold %.4f,%.4f > %.4f\n" RESET, a_var_1to0, a_var_2to1, params.init_imu_thresh);
     return false;
   }
 
@@ -213,8 +209,7 @@ bool StaticInitializer::initialize(double &timestamp, Eigen::MatrixXd &covarianc
   // Propagate into the current local IMU frame
   // R_GtoI = R_GtoI*R_GtoG -> H = R_GtoI
   Eigen::Matrix3d R_GtoI = quat_2_Rot(q_GtoI);
-  covariance.block(t_imu->q()->id(), t_imu->q()->id(), 3, 3) =
-      R_GtoI * covariance.block(t_imu->q()->id(), t_imu->q()->id(), 3, 3) * R_GtoI.transpose();
+  covariance.block(t_imu->q()->id(), t_imu->q()->id(), 3, 3) = R_GtoI * covariance.block(t_imu->q()->id(), t_imu->q()->id(), 3, 3) * R_GtoI.transpose();
 
   // Return :D
   return true;

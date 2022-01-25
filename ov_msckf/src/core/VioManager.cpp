@@ -159,8 +159,7 @@ void VioManager::feed_measurement_imu(const ov_core::ImuData &message) {
   size_t num_unique_cameras = (params.state_options.num_cameras == 2) ? 1 : params.state_options.num_cameras;
   if (unique_cam_ids.size() != num_unique_cameras) return;
 
-  // Loop through our queue and see if we are able to process any of our camera measurements
-  // We are able to process if we have at least one IMU measurement greater then the camera time
+  // 和我们的处理逻辑是一样的, 每当odom到来的时候, 会尝试处理最新的一帧cam数据( 条件是t_odom > t_cam )
   double timestamp_inC = message.timestamp - state->_calib_dt_CAMtoIMU->value()(0);
   while (!camera_queue.empty() && camera_queue.at(0).timestamp < timestamp_inC) {
     track_image_and_update(camera_queue.at(0));

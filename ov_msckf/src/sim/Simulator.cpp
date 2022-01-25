@@ -37,6 +37,8 @@ Simulator::Simulator(VioManagerOptions &params_) {
   // Store a copy of our params
   // NOTE: We need to explicitly create a copy of our shared pointers to the camera objects
   // NOTE: Otherwise if we perturb it would also change our "true" parameters
+
+  // 由于
   this->params = params_;
   params.camera_intrinsics.clear();
   for (auto const &tmp : params_.camera_intrinsics) {
