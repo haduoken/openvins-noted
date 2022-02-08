@@ -1,0 +1,30 @@
+%YAML:1.0
+
+cam0:
+  T_imu_cam: #rotation from camera to IMU, position of camera in IMU
+    - [ -0.999976,      0.00076614,      0.00693137,     0.0106997415423393 ]
+    - [ -0.000741741,   -0.999994,       0.00352203,     7.9366218415089e-06 ]
+    - [ 0.00693402,     0.0035168,       0.99997,        -7.41940311854705e-05 ]
+    - [ 0.0, 0.0, 0.0, 1.0 ]
+
+  cam_overlaps: [ 1 ]
+  camera_model: pinhole
+  distortion_coeffs: [ -0.010912629775703,    0.0486851409077644,    -0.045647818595171,    0.00873386114835739 ]
+  distortion_model: equidistant
+  intrinsics: [ 286.792907714844, 286.868408203125, 421.718811035156, 402.088012695312 ] #fu, fv, cu, cv
+  resolution: [ 800, 848 ]
+  rostopic: /camera/fisheye1/image_raw
+
+cam1:
+  T_imu_cam: #rotation from camera to IMU, position of IMU in camera
+    - [ 0.0125552670891, -0.999755099723, 0.0182237714554, -0.0198435579556 ]
+    - [ 0.999598781151, 0.0130119051815, 0.0251588363115, 0.0453689425024 ]
+    - [ -0.0253898008918, 0.0179005838253, 0.999517347078, 0.00786212447038 ]
+    - [ 0.0, 0.0, 0.0, 1.0 ]
+  cam_overlaps: [ 0 ]
+  camera_model: pinhole
+  distortion_coeffs: [ -0.28368365,0.07451284,-0.00010473,-3.55590700e-05 ]
+  distortion_model: radtan
+  intrinsics: [ 457.587, 456.134, 379.999, 255.238 ] #fu, fv, cu, cv
+  resolution: [ 752, 480 ]
+  rostopic: /cam1/image_raw

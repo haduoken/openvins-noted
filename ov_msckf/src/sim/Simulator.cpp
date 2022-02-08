@@ -25,7 +25,6 @@ using namespace ov_core;
 using namespace ov_msckf;
 
 Simulator::Simulator(VioManagerOptions &params_) {
-
   //===============================================================
   //===============================================================
 
@@ -38,7 +37,7 @@ Simulator::Simulator(VioManagerOptions &params_) {
   // NOTE: We need to explicitly create a copy of our shared pointers to the camera objects
   // NOTE: Otherwise if we perturb it would also change our "true" parameters
 
-  // 由于
+  // 由于VioManagerOptions都是基础类型组成, 所以拷贝赋值会自动进行 (int, double, map)
   this->params = params_;
   params.camera_intrinsics.clear();
   for (auto const &tmp : params_.camera_intrinsics) {
@@ -52,7 +51,7 @@ Simulator::Simulator(VioManagerOptions &params_) {
     }
   }
 
-  // Load the groundtruth trajectory and its spline
+  // Load the groundtruth trajectory and its spline(样条曲线)
   DatasetReader::load_simulated_trajectory(params.sim_traj_path, traj_data);
   spline.feed_trajectory(traj_data);
 
@@ -74,7 +73,6 @@ Simulator::Simulator(VioManagerOptions &params_) {
   double distance = 0.0;
   double distancethreshold = params.sim_distance_threshold;
   while (true) {
-
     // Get the pose at the current timestep
     Eigen::Matrix3d R_GtoI;
     Eigen::Vector3d p_IinG;
@@ -134,7 +132,6 @@ Simulator::Simulator(VioManagerOptions &params_) {
 
   // Perturb all calibration if we should
   if (params.sim_do_perturbation) {
-
     // Do the perturbation
     perturb_parameters(gen_state_perturb, params_);
 
@@ -159,21 +156,18 @@ Simulator::Simulator(VioManagerOptions &params_) {
   // NOTE: we loop through cameras here so that the feature map for camera 1 will always be the same
   // NOTE: thus when we add more cameras the first camera should get the same measurements
   for (int i = 0; i < params.state_options.num_cameras; i++) {
-
     // Reset the start time
     double time_synth = spline.get_start_time();
 
     // Loop through each pose and generate our feature map in them!!!!
     while (true) {
-
       // Get the pose at the current timestep
       Eigen::Matrix3d R_GtoI;
       Eigen::Vector3d p_IinG;
       bool success_pose = spline.get_pose(time_synth, R_GtoI, p_IinG);
 
       // We have finished generating features
-      if (!success_pose)
-        break;
+      if (!success_pose) break;
 
       // Get the uv features for this frame
       std::vector<std::pair<size_t, Eigen::VectorXf>> uvs = project_pointcloud(R_GtoI, p_IinG, i, featmap);
@@ -197,7 +191,6 @@ Simulator::Simulator(VioManagerOptions &params_) {
 }
 
 void Simulator::perturb_parameters(std::mt19937 gen_state, VioManagerOptions &params_) {
-
   // One std generator
   std::normal_distribution<double> w(0, 1);
 
@@ -206,7 +199,6 @@ void Simulator::perturb_parameters(std::mt19937 gen_state, VioManagerOptions &pa
 
   // Camera intrinsics and extrinsics
   for (int i = 0; i < params_.state_options.num_cameras; i++) {
-
     // Camera intrinsic properties (k1, k2, p1, p2, r1, r2, r3, r4)
     Eigen::MatrixXd intrinsics = params_.camera_intrinsics.at(i)->get_value();
     for (int r = 0; r < 4; r++) {
@@ -220,8 +212,7 @@ void Simulator::perturb_parameters(std::mt19937 gen_state, VioManagerOptions &pa
     // Our camera extrinsics transform (orientation)
     Eigen::Vector3d w_vec;
     w_vec << 0.001 * w(gen_state), 0.001 * w(gen_state), 0.001 * w(gen_state);
-    params_.camera_extrinsics.at(i).block(0, 0, 4, 1) =
-        rot_2_quat(exp_so3(w_vec) * quat_2_Rot(params_.camera_extrinsics.at(i).block(0, 0, 4, 1)));
+    params_.camera_extrinsics.at(i).block(0, 0, 4, 1) = rot_2_quat(exp_so3(w_vec) * quat_2_Rot(params_.camera_extrinsics.at(i).block(0, 0, 4, 1)));
 
     // Our camera extrinsics transform (position)
     for (int r = 4; r < 7; r++) {
@@ -231,7 +222,6 @@ void Simulator::perturb_parameters(std::mt19937 gen_state, VioManagerOptions &pa
 }
 
 bool Simulator::get_state(double desired_time, Eigen::Matrix<double, 17, 1> &imustate) {
-
   // Set to default state
   imustate.setZero();
   imustate(4) = 1;
@@ -275,10 +265,8 @@ bool Simulator::get_state(double desired_time, Eigen::Matrix<double, 17, 1> &imu
 }
 
 bool Simulator::get_next_imu(double &time_imu, Eigen::Vector3d &wm, Eigen::Vector3d &am) {
-
   // Return if the camera measurement should go before us
-  if (timestamp_last_cam + 1.0 / params.sim_freq_cam < timestamp_last_imu + 1.0 / params.sim_freq_imu)
-    return false;
+  if (timestamp_last_cam + 1.0 / params.sim_freq_cam < timestamp_last_imu + 1.0 / params.sim_freq_imu) return false;
 
   // Else lets do a new measurement!!!
   timestamp_last_imu += 1.0 / params.sim_freq_imu;
@@ -335,12 +323,9 @@ bool Simulator::get_next_imu(double &time_imu, Eigen::Vector3d &wm, Eigen::Vecto
   return true;
 }
 
-bool Simulator::get_next_cam(double &time_cam, std::vector<int> &camids,
-                             std::vector<std::vector<std::pair<size_t, Eigen::VectorXf>>> &feats) {
-
+bool Simulator::get_next_cam(double &time_cam, std::vector<int> &camids, std::vector<std::vector<std::pair<size_t, Eigen::VectorXf>>> &feats) {
   // Return if the imu measurement should go before us
-  if (timestamp_last_imu + 1.0 / params.sim_freq_imu < timestamp_last_cam + 1.0 / params.sim_freq_cam)
-    return false;
+  if (timestamp_last_imu + 1.0 / params.sim_freq_imu < timestamp_last_cam + 1.0 / params.sim_freq_cam) return false;
 
   // Else lets do a new measurement!!!
   timestamp_last_cam += 1.0 / params.sim_freq_cam;
@@ -360,14 +345,12 @@ bool Simulator::get_next_cam(double &time_cam, std::vector<int> &camids,
 
   // Loop through each camera
   for (int i = 0; i < params.state_options.num_cameras; i++) {
-
     // Get the uv features for this frame
     std::vector<std::pair<size_t, Eigen::VectorXf>> uvs = project_pointcloud(R_GtoI, p_IinG, i, featmap);
 
     // If we do not have enough, generate more
     if ((int)uvs.size() < params.num_pts) {
-      PRINT_WARNING(YELLOW "[SIM]: cam %d was unable to generate enough features (%d < %d projections)\n" RESET, (int)i, (int)uvs.size(),
-                    params.num_pts);
+      PRINT_WARNING(YELLOW "[SIM]: cam %d was unable to generate enough features (%d < %d projections)\n" RESET, (int)i, (int)uvs.size(), params.num_pts);
     }
 
     // If greater than only select the first set
@@ -377,6 +360,7 @@ bool Simulator::get_next_cam(double &time_cam, std::vector<int> &camids,
 
     // Append the map size so all cameras have unique features in them (but the same map)
     // Only do this if we are not enforcing stereo constraints between all our cameras
+    // 保证feature的id是一致的
     for (size_t f = 0; f < uvs.size() && !params.use_stereo; f++) {
       uvs.at(f).first += i * featmap.size();
     }
@@ -397,10 +381,8 @@ bool Simulator::get_next_cam(double &time_cam, std::vector<int> &camids,
   return true;
 }
 
-std::vector<std::pair<size_t, Eigen::VectorXf>> Simulator::project_pointcloud(const Eigen::Matrix3d &R_GtoI, const Eigen::Vector3d &p_IinG,
-                                                                              int camid,
+std::vector<std::pair<size_t, Eigen::VectorXf>> Simulator::project_pointcloud(const Eigen::Matrix3d &R_GtoI, const Eigen::Vector3d &p_IinG, int camid,
                                                                               const std::unordered_map<size_t, Eigen::Vector3d> &feats) {
-
   // Assert we have good camera
   assert(camid < params.state_options.num_cameras);
   assert((int)params.camera_intrinsics.size() == params.state_options.num_cameras);
@@ -416,14 +398,12 @@ std::vector<std::pair<size_t, Eigen::VectorXf>> Simulator::project_pointcloud(co
 
   // Loop through our map
   for (const auto &feat : feats) {
-
     // Transform feature into current camera frame
     Eigen::Vector3d p_FinI = R_GtoI * (feat.second - p_IinG);
     Eigen::Vector3d p_FinC = R_ItoC * p_FinI + p_IinC;
 
     // Skip cloud if too far away
-    if (p_FinC(2) > params.sim_max_feature_gen_distance || p_FinC(2) < 0.1)
-      continue;
+    if (p_FinC(2) > params.sim_max_feature_gen_distance || p_FinC(2) < 0.1) continue;
 
     // Project to normalized coordinates
     Eigen::Vector2f uv_norm;
@@ -446,9 +426,8 @@ std::vector<std::pair<size_t, Eigen::VectorXf>> Simulator::project_pointcloud(co
   return uvs;
 }
 
-void Simulator::generate_points(const Eigen::Matrix3d &R_GtoI, const Eigen::Vector3d &p_IinG, int camid,
-                                std::unordered_map<size_t, Eigen::Vector3d> &feats, int numpts) {
-
+void Simulator::generate_points(const Eigen::Matrix3d &R_GtoI, const Eigen::Vector3d &p_IinG, int camid, std::unordered_map<size_t, Eigen::Vector3d> &feats,
+                                int numpts) {
   // Assert we have good camera
   assert(camid < params.state_options.num_cameras);
   assert((int)params.camera_intrinsics.size() == params.state_options.num_cameras);
@@ -461,7 +440,6 @@ void Simulator::generate_points(const Eigen::Matrix3d &R_GtoI, const Eigen::Vect
 
   // Generate the desired number of features
   for (int i = 0; i < numpts; i++) {
-
     // Uniformly randomly generate within our fov
     std::uniform_real_distribution<double> gen_u(0, camera->w());
     std::uniform_real_distribution<double> gen_v(0, camera->h());
