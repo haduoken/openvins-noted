@@ -1,7 +1,6 @@
 <launch>
 
     <!-- what config we are going to run (should match folder name) -->
-    <arg name="verbosity" default="INFO"/> <!-- ALL, DEBUG, INFO, WARNING, ERROR, SILENT -->
     <arg name="config" default="live_data"/> <!-- euroc_mav, tum_vi, rpng_aruco -->
     <arg name="config_path" default="$(find ov_msckf)/../config/$(arg config)/estimator_config.yaml"/>
 
@@ -20,7 +19,6 @@
           required="true">
 
         <!-- master configuration object -->
-        <param name="verbosity" type="string" value="$(arg verbosity)"/>
         <param name="config_path" type="string" value="$(arg config_path)"/>
 
         <!-- timing statistics recording -->

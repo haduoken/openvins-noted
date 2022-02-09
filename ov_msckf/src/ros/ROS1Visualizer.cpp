@@ -20,6 +20,7 @@
  */
 
 #include "ROS1Visualizer.h"
+#include <eigen_conversions/eigen_msg.h>
 
 using namespace ov_core;
 using namespace ov_type;
@@ -322,12 +323,37 @@ void ROS1Visualizer::visualize_final() {
   PRINT_INFO(REDPURPLE "TIME: %.3f seconds\n\n" RESET, (rT2 - rT1).total_microseconds() * 1e-6);
 }
 
+sensor_msgs::Imu trans_imu_msg(const sensor_msgs::ImuConstPtr &msg) {
+  sensor_msgs::Imu imu_ret = *msg;
+  Eigen::Vector3d angular_vel = Eigen::Vector3d::Zero();
+  Eigen::Vector3d linear_acc = Eigen::Vector3d::Zero();
+
+  tf::vectorMsgToEigen(msg->angular_velocity, angular_vel);
+  tf::vectorMsgToEigen(msg->linear_acceleration, linear_acc);
+
+  Eigen::Matrix3d acc_R, gyro_R;
+  acc_R << 1.021514, 0.000000, 0.000000, 0.000000, 1.036281, 0.000000, 0.000000, 0.000000, 1.014480;
+  gyro_R << 1.000869, 0.000000, 0.000000, 0.000000, 1.002638, 0.000000, 0.000000, 0.000000, 0.994423;
+  Eigen::Vector3d acc_t, gyro_t;
+  acc_t << -0.038824, 0.483768, -0.316028;
+  gyro_t << 0.002378, -0.000625, -0.001083;
+
+  angular_vel = gyro_R * (angular_vel - gyro_t);
+  linear_acc = acc_R * (linear_acc - acc_t);
+
+  tf::vectorEigenToMsg(angular_vel, imu_ret.angular_velocity);
+  tf::vectorEigenToMsg(linear_acc, imu_ret.linear_acceleration);
+
+  return imu_ret;
+}
+
 void ROS1Visualizer::callback_inertial(const sensor_msgs::Imu::ConstPtr &msg) {
   // convert into correct format
   ov_core::ImuData message;
+  auto new_msg = trans_imu_msg(msg);
   message.timestamp = msg->header.stamp.toSec();
-  message.wm << msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z;
-  message.am << msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z;
+  message.wm << new_msg.angular_velocity.x, new_msg.angular_velocity.y, new_msg.angular_velocity.z;
+  message.am << new_msg.linear_acceleration.x, new_msg.linear_acceleration.y, new_msg.linear_acceleration.z;
 
   // send it to our VIO system
   _app->feed_measurement_imu(message);

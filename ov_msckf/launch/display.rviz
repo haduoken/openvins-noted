@@ -59,6 +59,26 @@ Visualization Manager:
           Value: true
         cam1:
           Value: true
+        camera_accel_frame:
+          Value: true
+        camera_accel_optical_frame:
+          Value: true
+        camera_fisheye1_frame:
+          Value: true
+        camera_fisheye1_optical_frame:
+          Value: true
+        camera_fisheye2_frame:
+          Value: true
+        camera_fisheye2_optical_frame:
+          Value: true
+        camera_gyro_frame:
+          Value: true
+        camera_imu_optical_frame:
+          Value: true
+        camera_link:
+          Value: true
+        camera_pose_frame:
+          Value: true
         global:
           Value: true
         imu:
@@ -314,7 +334,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: true
-      Enabled: true
+      Enabled: false
       Keep: 100
       Name: imu_odom
       Position Tolerance: 0.100000001
@@ -330,7 +350,7 @@ Visualization Manager:
         Value: Axes
       Topic: /ov_msckf/odomimu
       Unreliable: false
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 44; 44; 44
@@ -356,25 +376,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 21.9279022
+      Distance: 7.33435631
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.97850573
-        Y: -4.27172565
-        Z: 3.90165281
+        X: 0.128175423
+        Y: -3.14918709
+        Z: 3.41184807
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.624797821
+      Pitch: 0.274797946
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.85357618
+      Yaw: 4.05857182
     Saved: ~
 Window Geometry:
   Current Depths:

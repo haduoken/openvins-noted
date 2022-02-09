@@ -144,7 +144,6 @@ void VioManager::feed_measurement_imu(const ov_core::ImuData &message) {
   }
 
   // Count how many unique image streams
-  PRINT_INFO("imu msg ######\n");
 
   // 看camera_queue里面是否有东西
   std::vector<int> unique_cam_ids;
