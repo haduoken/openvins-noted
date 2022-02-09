@@ -350,7 +350,7 @@ sensor_msgs::Imu trans_imu_msg(const sensor_msgs::ImuConstPtr &msg) {
 void ROS1Visualizer::callback_inertial(const sensor_msgs::Imu::ConstPtr &msg) {
   // convert into correct format
   ov_core::ImuData message;
-  auto new_msg = trans_imu_msg(msg);
+  auto new_msg = *msg;
   message.timestamp = msg->header.stamp.toSec();
   message.wm << new_msg.angular_velocity.x, new_msg.angular_velocity.y, new_msg.angular_velocity.z;
   message.am << new_msg.linear_acceleration.x, new_msg.linear_acceleration.y, new_msg.linear_acceleration.z;
