@@ -14,3 +14,18 @@ cam0:
   intrinsics: [ 286.792907714844, 286.868408203125, 421.718811035156, 402.088012695312 ] #fu, fv, cu, cv
   resolution: [ 848,800 ]
   rostopic: /camera/fisheye1/image_raw
+
+cam1:
+  T_imu_cam: #rotation from camera to IMU, position of camera in IMU
+    - [ -0.999976,      0.00076614,      0.00693137,     -0.0506997415423393 ]
+    - [ -0.000741741,   -0.999994,       0.00352203,     7.9366218415089e-06 ]
+    - [ 0.00693402,     0.0035168,       0.99997,        -7.41940311854705e-05 ]
+    - [ 0.0, 0.0, 0.0, 1.0 ]
+
+  cam_overlaps: [ 0 ]
+  camera_model: pinhole
+  distortion_coeffs: [ -0.010912629775703,    0.0486851409077644,    -0.045647818595171,    0.00873386114835739 ]
+  distortion_model: equidistant
+  intrinsics: [ 286.792907714844, 286.868408203125, 421.718811035156, 402.088012695312 ] #fu, fv, cu, cv
+  resolution: [ 848,800 ]
+  rostopic: /camera/fisheye2/image_raw
